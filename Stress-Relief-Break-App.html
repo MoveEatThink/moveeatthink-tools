@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stress-Relief Break</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1EA;
+    --surface:#FFFFFF;
+    --surface-soft:#E1E7E0;
+    --ink:#26312C;
+    --ink-soft:#4B5750;
+    --teal:#2E6A62;
+    --teal-soft:#CFE0DC;
+    --mauve:#8C6A82;
+    --mauve-soft:#E9DEE5;
+    --radius:20px;
+    --ring-color: var(--teal);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Atkinson Hyperlegible', system-ui, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    padding:28px 20px 48px;
+  }
+  h1,h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  header{margin-bottom:28px; text-align:center;}
+  header h1{font-size:1.7rem; margin-bottom:8px;}
+  header p{color:var(--ink-soft); margin:0; font-size:0.95rem;}
+
+  section{margin-bottom:38px;}
+  section + section{
+    padding-top:30px;
+    border-top:1px solid var(--surface-soft);
+  }
+
+  /* ---- Breathing card ---- */
+  .breathe-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:24px 20px 28px;
+  }
+  .chip-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .breathe-card > .eyebrow{
+    text-align:center;
+  }
+  .chip{
+    border:1px solid var(--surface-soft);
+    background:transparent;
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:7px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.8rem;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .chip.selected{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:#fff;
+  }
+  .technique-block{margin-bottom:18px;}
+  .technique-caption{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    margin:8px 2px 0;
+    min-height:2.2em;
+    text-align:center;
+  }
+
+  .visual-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 0 10px;
+  }
+  .breathe-visual{
+    position:relative;
+    width:200px;
+    height:200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .breathe-visual svg{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    transform:rotate(-90deg);
+  }
+  .ring-track{
+    fill:none;
+    stroke:var(--surface-soft);
+    stroke-width:5;
+  }
+  .ring-progress{
+    fill:none;
+    stroke:var(--ring-color);
+    stroke-width:5;
+    stroke-linecap:round;
+  }
+  .blob{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--teal-soft), var(--teal) 75%);
+    transform:scale(1);
+    will-change:transform;
+  }
+  .phase-exhale .blob{
+    background:radial-gradient(circle at 35% 30%, var(--mauve-soft), var(--mauve) 75%);
+  }
+  .phase-text{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    text-align:center;
+    color:#fff;
+    pointer-events:none;
+    text-shadow:0 2px 6px rgba(0,0,0,0.28);
+  }
+  .phase-name{
+    display:block;
+    font-family:'Fraunces', serif;
+    font-size:1.3rem;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .phase-count{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:500;
+    font-size:2.1rem;
+    margin-top:4px;
+  }
+  .time-left{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .mood-row{margin-top:6px;}
+  .mood-label{font-size:0.88rem; color:var(--ink-soft); margin-bottom:8px; display:block; text-align:center;}
+  .mood-buttons{display:flex; gap:6px; justify-content:space-between;}
+  .mood-btn{
+    flex:1;
+    border:1px solid var(--surface-soft);
+    background:transparent;
+    border-radius:12px;
+    padding:9px 2px;
+    font-size:1.15rem;
+    cursor:pointer;
+    transition:background .15s, border-color .15s, transform .1s;
+  }
+  .mood-btn.selected{
+    background:var(--mauve-soft);
+    border-color:var(--mauve);
+    transform:translateY(-1px);
+  }
+
+  .primary-btn{
+    width:100%;
+    margin-top:18px;
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:14px;
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .primary-btn:active{transform:translateY(1px);}
+  .ghost-btn{
+    display:block;
+    margin:14px auto 0;
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+
+  .complete-msg{
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .complete-msg .big{
+    font-family:'Fraunces', serif;
+    font-size:1.3rem;
+  }
+
+  .toolbox > .eyebrow, .toolbox > h2{
+    text-align:center;
+  }
+  /* ---- Toolbox ---- */
+  details{
+    background:var(--surface);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  summary{
+    cursor:pointer;
+    font-weight:700;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .dur{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    font-weight:400;
+    white-space:nowrap;
+  }
+  details p{
+    margin:10px 0 0;
+    font-size:0.92rem;
+    color:var(--ink-soft);
+  }
+
+  /* ---- Tracker ---- */
+  .tracker > .eyebrow{
+    text-align:center;
+  }
+  #trackerContent{
+    text-align:center;
+  }
+  .streak-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .streak-num{
+    font-family:'Fraunces', serif;
+    font-size:2.1rem;
+    font-weight:600;
+  }
+  .streak-label{color:var(--ink-soft); font-size:0.9rem;}
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .dot{
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--surface-soft);
+    flex:1;
+  }
+  .dot.filled{background:var(--teal);}
+  .dot.today{box-shadow:0 0 0 2px var(--mauve);}
+  .mood-delta{
+    font-size:0.9rem;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .reset-link{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+
+  footer{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (prefers-reduced-motion: reduce){
+    .blob, .ring-progress{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <p class="eyebrow">Anti-stress break</p>
+    <h1>Breathing, for real, for two minutes</h1>
+    <p>A short pause to take whenever tension starts to rise.</p>
+  </header>
+
+  <section id="breatheSection" class="breathe">
+
+    <!-- SETUP SCREEN -->
+    <div id="setupScreen" class="breathe-card">
+      <p class="eyebrow">Duration</p>
+      <div class="chip-row" id="durationChips">
+        <button class="chip" data-duration="2">2 min</button>
+        <button class="chip selected" data-duration="3">3 min</button>
+        <button class="chip" data-duration="5">5 min</button>
+      </div>
+
+      <p class="eyebrow">Technique</p>
+      <div class="chip-row" id="techniqueChips">
+        <button class="chip selected" data-technique="calming">Calming (4-6)</button>
+        <button class="chip" data-technique="box">Box (4-4-4-4)</button>
+      </div>
+      <p class="technique-caption" id="techniqueCaption">Exhaling longer than you inhale is what calms your nervous system.</p>
+
+      <div class="mood-row">
+        <span class="mood-label">Before you start, where are you? (optional)</span>
+        <div class="mood-buttons" id="moodBeforeGroup">
+          <button class="mood-btn" data-value="1" title="Very tense">😣</button>
+          <button class="mood-btn" data-value="2" title="Tense">😕</button>
+          <button class="mood-btn" data-value="3" title="Neutral">😐</button>
+          <button class="mood-btn" data-value="4" title="Fairly calm">🙂</button>
+          <button class="mood-btn" data-value="5" title="Calm">😌</button>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="startBtn">Start the break</button>
+    </div>
+
+    <!-- SESSION SCREEN -->
+    <div id="sessionScreen" class="breathe-card hidden">
+      <div class="visual-wrap">
+        <div class="breathe-visual">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="ring-track" cx="100" cy="100" r="92"></circle>
+            <circle id="ringProgress" class="ring-progress" cx="100" cy="100" r="92"></circle>
+          </svg>
+          <div class="blob" id="blob">
+            <div class="phase-text">
+              <span class="phase-name" id="phaseName">Inhale</span>
+              <span class="phase-count" id="phaseCount">4</span>
+            </div>
+          </div>
+        </div>
+        <p class="time-left" id="timeLeft" aria-live="polite">3:00 left</p>
+      </div>
+      <button class="ghost-btn" id="stopBtn">Stop the break</button>
+    </div>
+
+    <!-- COMPLETE SCREEN -->
+    <div id="completeScreen" class="breathe-card hidden">
+      <div class="complete-msg">
+        <span class="big">All done.</span>
+      </div>
+      <div class="mood-row">
+        <span class="mood-label">And now, how do you feel? (optional)</span>
+        <div class="mood-buttons" id="moodAfterGroup">
+          <button class="mood-btn" data-value="1" title="Very tense">😣</button>
+          <button class="mood-btn" data-value="2" title="Tense">😕</button>
+          <button class="mood-btn" data-value="3" title="Neutral">😐</button>
+          <button class="mood-btn" data-value="4" title="Fairly calm">🙂</button>
+          <button class="mood-btn" data-value="5" title="Calm">😌</button>
+        </div>
+      </div>
+      <button class="primary-btn" id="finishBtn">Finish</button>
+    </div>
+
+  </section>
+
+  <section class="toolbox">
+    <p class="eyebrow">If you need something else</p>
+    <h2 style="font-size:1.2rem; margin-bottom:14px;">Three more quick tools</h2>
+
+    <details>
+      <summary>5-4-3-2-1 grounding <span class="dur">~2 min</span></summary>
+      <p>Silently name: 5 things you can see, 4 you can hear, 3 you can touch, 2 you can smell, 1 you can taste (or simply your breath). This brings your attention back to the here and now.</p>
+    </details>
+
+    <details>
+      <summary>Quick body scan <span class="dur">~3 min</span></summary>
+      <p>Lower your gaze or close your eyes. Mentally sweep your body from your feet to your head, without changing anything, just noticing tension. Finish with three deep breaths.</p>
+    </details>
+
+    <details>
+      <summary>An anchor phrase <span class="dur">~1 min</span></summary>
+      <p>Silently repeat a short phrase in rhythm with your breath: inhale "I am here," exhale "this will pass." Pick your own and keep the same one each time.</p>
+    </details>
+  </section>
+
+  <section class="tracker">
+    <p class="eyebrow">Your tracker</p>
+    <div id="trackerContent">
+      <p style="color:var(--ink-soft); font-size:0.9rem;">Loading your tracker…</p>
+    </div>
+  </section>
+
+  <footer>
+    These breaks aren't a substitute for professional support. If anxiety feels heavy or doesn't let up, talking to a doctor or therapist can really help.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'mindfulness-log';
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const state = {
+    technique: 'calming',
+    durationMin: 3,
+    moodBefore: null,
+    moodAfter: null,
+    phases: [],
+    phaseIndex: 0,
+    phaseElapsed: 0,
+    totalElapsed: 0,
+    totalSeconds: 0,
+    timerId: null,
+    log: []
+  };
+
+  const techniqueCaptions = {
+    calming: "Exhaling longer than you inhale is what calms your nervous system.",
+    box: "Four equal counts, to ground yourself quickly."
+  };
+
+  function getPhases(technique){
+    if (technique === 'calming') {
+      return [{name:'Inhale', dur:4}, {name:'Exhale', dur:6}];
+    }
+    return [{name:'Inhale', dur:4}, {name:'Hold', dur:4}, {name:'Exhale', dur:4}, {name:'Hold', dur:4}];
+  }
+
+  // ---------- DOM refs ----------
+  const setupScreen = document.getElementById('setupScreen');
+  const sessionScreen = document.getElementById('sessionScreen');
+  const completeScreen = document.getElementById('completeScreen');
+  const breatheSection = document.getElementById('breatheSection');
+
+  const durationChips = document.getElementById('durationChips');
+  const techniqueChips = document.getElementById('techniqueChips');
+  const techniqueCaption = document.getElementById('techniqueCaption');
+  const moodBeforeGroup = document.getElementById('moodBeforeGroup');
+  const moodAfterGroup = document.getElementById('moodAfterGroup');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const finishBtn = document.getElementById('finishBtn');
+
+  const blob = document.getElementById('blob');
+  const ring = document.getElementById('ringProgress');
+  const phaseNameEl = document.getElementById('phaseName');
+  const phaseCountEl = document.getElementById('phaseCount');
+  const timeLeftEl = document.getElementById('timeLeft');
+
+  const trackerContent = document.getElementById('trackerContent');
+
+  let RING_LEN = 0;
+  try { RING_LEN = ring.getTotalLength(); } catch(e) { RING_LEN = 578; }
+  ring.style.strokeDasharray = RING_LEN;
+  ring.style.strokeDashoffset = RING_LEN;
+
+  // ---------- Setup screen interactions ----------
+  durationChips.addEventListener('click', function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    state.durationMin = parseInt(btn.dataset.duration, 10);
+    durationChips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+
+  techniqueChips.addEventListener('click', function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    state.technique = btn.dataset.technique;
+    techniqueChips.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    techniqueCaption.textContent = techniqueCaptions[state.technique];
+  });
+
+  function wireMoodGroup(group, key){
+    group.addEventListener('click', function(e){
+      const btn = e.target.closest('.mood-btn');
+      if (!btn) return;
+      state[key] = parseInt(btn.dataset.value, 10);
+      group.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  }
+  wireMoodGroup(moodBeforeGroup, 'moodBefore');
+  wireMoodGroup(moodAfterGroup, 'moodAfter');
+
+  function showScreen(name){
+    setupScreen.classList.toggle('hidden', name !== 'setup');
+    sessionScreen.classList.toggle('hidden', name !== 'session');
+    completeScreen.classList.toggle('hidden', name !== 'complete');
+  }
+
+  // ---------- Session logic ----------
+  function formatTime(sec){
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function setPhaseVisual(phase){
+    breatheSection.classList.remove('phase-inhale', 'phase-exhale', 'phase-hold');
+    const cls = phase.name === 'Inhale' ? 'phase-inhale' : (phase.name === 'Exhale' ? 'phase-exhale' : 'phase-hold');
+    breatheSection.classList.add(cls);
+    phaseNameEl.textContent = phase.name;
+
+    if (reducedMotion) {
+      ring.style.strokeDashoffset = 0;
+      return;
+    }
+
+    ring.style.transition = 'none';
+    ring.style.strokeDashoffset = RING_LEN;
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        ring.style.transition = 'stroke-dashoffset ' + phase.dur + 's linear';
+        ring.style.strokeDashoffset = 0;
+        if (phase.name === 'Inhale') {
+          blob.style.transition = 'transform ' + phase.dur + 's ease-in-out, background ' + phase.dur + 's ease-in-out';
+          blob.style.transform = 'scale(1.15)';
+        } else if (phase.name === 'Exhale') {
+          blob.style.transition = 'transform ' + phase.dur + 's ease-in-out, background ' + phase.dur + 's ease-in-out';
+          blob.style.transform = 'scale(0.85)';
+        }
+      });
+    });
+  }
+
+  function beginPhase(){
+    const phase = state.phases[state.phaseIndex];
+    state.phaseElapsed = 0;
+    phaseCountEl.textContent = phase.dur;
+    setPhaseVisual(phase);
+  }
+
+  function tick(){
+    state.phaseElapsed++;
+    state.totalElapsed++;
+    const phase = state.phases[state.phaseIndex];
+    const remaining = Math.max(phase.dur - state.phaseElapsed, 0);
+    phaseCountEl.textContent = remaining > 0 ? remaining : phase.dur;
+    timeLeftEl.textContent = formatTime(Math.max(state.totalSeconds - state.totalElapsed, 0)) + ' left';
+
+    if (state.totalElapsed >= state.totalSeconds) {
+      finishSession();
+      return;
+    }
+    if (state.phaseElapsed >= phase.dur) {
+      state.phaseIndex = (state.phaseIndex + 1) % state.phases.length;
+      beginPhase();
+    }
+  }
+
+  function startSession(){
+    state.phases = getPhases(state.technique);
+    state.totalSeconds = state.durationMin * 60;
+    state.phaseIndex = 0;
+    state.totalElapsed = 0;
+    showScreen('session');
+    timeLeftEl.textContent = formatTime(state.totalSeconds) + ' left';
+    beginPhase();
+    state.timerId = setInterval(tick, 1000);
+  }
+
+  function stopSession(){
+    clearInterval(state.timerId);
+    showScreen('setup');
+  }
+
+  function finishSession(){
+    clearInterval(state.timerId);
+    moodAfterGroup.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    state.moodAfter = null;
+    showScreen('complete');
+  }
+
+  startBtn.addEventListener('click', startSession);
+  stopBtn.addEventListener('click', stopSession);
+
+  finishBtn.addEventListener('click', async function(){
+    await saveEntry();
+    state.moodBefore = null;
+    state.moodAfter = null;
+    moodBeforeGroup.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    showScreen('setup');
+  });
+
+  // ---------- Storage ----------
+  function todayKey(d){
+    d = d || new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  async function loadLog(){
+    if (!window.storage) return [];
+    try {
+      const res = await window.storage.get(STORAGE_KEY, false);
+      return res && res.value ? JSON.parse(res.value) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function persistLog(){
+    if (!window.storage) return false;
+    try {
+      const res = await window.storage.set(STORAGE_KEY, JSON.stringify(state.log), false);
+      return !!res;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function saveEntry(){
+    state.log.push({
+      date: todayKey(),
+      technique: state.technique,
+      durationMin: state.durationMin,
+      moodBefore: state.moodBefore,
+      moodAfter: state.moodAfter,
+      completedAt: Date.now()
+    });
+    await persistLog();
+    renderTracker();
+  }
+
+  function computeStreak(dateSet){
+    let streak = 0;
+    let cursor = new Date();
+    if (!dateSet.has(todayKey(cursor))) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    while (dateSet.has(todayKey(cursor))) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }
+
+  function renderTracker(){
+    const dateSet = new Set(state.log.map(e => e.date));
+    const streak = computeStreak(dateSet);
+
+    let dotsHtml = '';
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = todayKey(d);
+      const classes = ['dot'];
+      if (dateSet.has(key)) classes.push('filled');
+      if (i === 0) classes.push('today');
+      dotsHtml += '<div class="' + classes.join(' ') + '" title="' + key + '"></div>';
+    }
+
+    const withMood = state.log.filter(e => typeof e.moodBefore === 'number' && typeof e.moodAfter === 'number');
+    let moodHtml = '';
+    if (withMood.length >= 2) {
+      const avgDelta = withMood.reduce((sum, e) => sum + (e.moodAfter - e.moodBefore), 0) / withMood.length;
+      const sign = avgDelta > 0 ? '+' : '';
+      moodHtml = '<p class="mood-delta">On average, you feel ' + sign + avgDelta.toFixed(1) + ' point(s) calmer after your breaks.</p>';
+    }
+
+    const streakLabel = streak === 1 ? 'day in a row' : 'days in a row';
+    const sessionsLabel = state.log.length === 1 ? 'break logged' : 'breaks logged';
+
+    trackerContent.innerHTML =
+      '<div class="streak-row"><span class="streak-num">' + streak + '</span><span class="streak-label">' + streakLabel + '</span></div>' +
+      '<div class="dots">' + dotsHtml + '</div>' +
+      moodHtml +
+      '<p style="font-size:0.85rem; color:var(--ink-soft); margin-bottom:10px;">' + state.log.length + ' ' + sessionsLabel + '</p>' +
+      '<button class="reset-link" id="resetTrackerBtn">Reset my tracker</button>';
+
+    const resetBtn = document.getElementById('resetTrackerBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', async function(){
+        state.log = [];
+        if (window.storage) {
+          try { await window.storage.delete(STORAGE_KEY, false); } catch(e) {}
+        }
+        renderTracker();
+      });
+    }
+  }
+
+  // ---------- Init ----------
+  (async function init(){
+    state.log = await loadLog();
+    renderTracker();
+  })();
+
+})();
+</script>
+</body>
+</html>
